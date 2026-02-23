@@ -1293,6 +1293,113 @@
   </div>
 
 </div><!-- end train-section -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION — Définitions PPO / LSTM                          -->
+<!-- ═══════════════════════════════════════════════════════════ -->
 
+<div class="section-title">⑦ Définitions — Step / Épisode / Buffer / Epoch</div>
+
+<div class="pipeline">
+  <div class="section">
+    <div class="row row-center">
+      <div class="block c-eval" style="max-width:1000px;">
+        <div class="block-title">Glossaire opérationnel du training RecurrentPPO</div>
+        <div class="block-body" style="font-size:12px; line-height:1.8; color:#aaa;">
+
+          <h3 style="color:#fff;">Step</h3>
+          <p>
+          Un <strong>step</strong> correspond à une journée de trading simulée.
+          Le modèle observe les 56 features du jour (RSI, volatilité, corrélations, etc.),
+          décide d'une fraction d’exposition comprise entre -1 et +1,
+          puis reçoit un reward correspondant au gain ou à la perte générée.
+          </p>
+          <p>
+          1 000 000 de steps représentent 1 000 000 décisions de trading simulées.
+          Il ne s'agit pas de 1 000 000 de jours réels : les données historiques sont rejouées
+          depuis différents points de départ à chaque épisode.
+          </p>
+
+          <h3 style="color:#fff;">Épisode</h3>
+          <p>
+          Un <strong>épisode</strong> est une séquence complète de trading simulée.
+          Il débute à une date aléatoire dans l'historique avec un capital initial,
+          puis progresse jour après jour jusqu'à atteindre la fin des données
+          ou un seuil de drawdown prédéfini (kill-switch).
+          </p>
+          <p>
+          Chaque épisode dure au minimum 365 steps.
+          Plusieurs milliers d’épisodes sont parcourus au cours de l’entraînement,
+          chacun commençant à un point différent de l’historique.
+          </p>
+
+          <h3 style="color:#fff;">Buffer</h3>
+          <p>
+          Le <strong>buffer</strong> est une mémoire temporaire contenant 512 steps consécutifs.
+          Pour chaque step, sont enregistrés :
+          </p>
+          <ul>
+            <li>Les observations (56 features + variables de portefeuille)</li>
+            <li>L’action prise</li>
+            <li>Le reward reçu</li>
+            <li>Les états LSTM (h et c)</li>
+          </ul>
+          <p>
+          Une fois rempli, le buffer est utilisé pour l’apprentissage,
+          puis supprimé avant de recommencer une nouvelle phase de collecte.
+          </p>
+
+          <h3 style="color:#fff;">Epoch</h3>
+          <p>
+          Un <strong>epoch</strong> correspond à une relecture complète du buffer.
+          Plutôt que d'apprendre une seule fois sur les 512 steps collectés,
+          le modèle effectue 10 passes successives sur ces mêmes données,
+          ce qui améliore l’efficacité de l’apprentissage.
+          </p>
+
+          <h3 style="color:#fff;">Mini-batch</h3>
+          <p>
+          Le buffer de 512 steps est divisé en 8 mini-batches de 64 steps consécutifs.
+          Les séquences restent ordonnées dans le temps afin de préserver la cohérence
+          des états LSTM.
+          </p>
+
+          <h3 style="color:#fff;">Re-forward</h3>
+          <p>
+          Lors de l’apprentissage, chaque mini-batch est rejoué dans le réseau
+          avec les poids actuels du modèle.
+          Les états LSTM sont recalculés à partir de l’état initial sauvegardé,
+          afin d’obtenir des probabilités d’action cohérentes avec les paramètres mis à jour.
+          </p>
+
+          <h3 style="color:#fff;">Évaluation pendant le training</h3>
+          <p><strong>Actor :</strong> Ajuste la probabilité des actions passées en fonction de leur avantage (A_t).</p>
+          <p><strong>Critic :</strong> Apprend à prédire la valeur future attendue depuis un état donné.</p>
+
+          <h3 style="color:#fff;">Résumé quantitatif</h3>
+
+          <table style="width:100%; border-collapse:collapse; font-size:12px;">
+            <thead>
+              <tr style="border-bottom:1px solid #333; color:#fff;">
+                <th style="text-align:left; padding:6px;">Concept</th>
+                <th style="text-align:left; padding:6px;">Description</th>
+                <th style="text-align:left; padding:6px;">Quantité</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td style="padding:6px;">Step</td><td style="padding:6px;">Une journée simulée</td><td style="padding:6px;">1 000 000</td></tr>
+              <tr><td style="padding:6px;">Épisode</td><td style="padding:6px;">Séquence complète (≥ 365 jours)</td><td style="padding:6px;">~ 2 700</td></tr>
+              <tr><td style="padding:6px;">Buffer</td><td style="padding:6px;">Bloc de 512 steps</td><td style="padding:6px;">1 953</td></tr>
+              <tr><td style="padding:6px;">Epoch</td><td style="padding:6px;">Relecture complète du buffer</td><td style="padding:6px;">10 par buffer</td></tr>
+              <tr><td style="padding:6px;">Mini-batch</td><td style="padding:6px;">Séquence de 64 steps</td><td style="padding:6px;">8 par epoch</td></tr>
+              <tr><td style="padding:6px;">Re-forward</td><td style="padding:6px;">Recalcul des états LSTM</td><td style="padding:6px;">80 par buffer</td></tr>
+              <tr><td style="padding:6px;">Gradient step</td><td style="padding:6px;">Mise à jour Adam</td><td style="padding:6px;">~ 156 000</td></tr>
+            </tbody>
+          </table>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
