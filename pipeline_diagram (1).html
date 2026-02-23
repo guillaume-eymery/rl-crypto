@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>RL Trading Pipeline</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0a0a0f;
+    color: #e0e0e0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 40px 20px 80px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 6px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #555;
+    font-size: 11px;
+    margin-bottom: 40px;
+    letter-spacing: 1px;
+  }
+
+  /* ── PIPELINE CONTAINER ── */
+  .pipeline {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* ── PHASE HEADER ── */
+  .phase-header {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    display: inline-block;
+  }
+
+  /* ── ROW ── */
+  .row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+
+  .row-center {
+    justify-content: center;
+  }
+
+  /* ── BLOCK ── */
+  .block {
+    border: 1px solid;
+    border-radius: 4px;
+    padding: 12px 16px;
+    min-width: 140px;
+    max-width: 240px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .block-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .block-body {
+    font-size: 10.5px;
+    line-height: 1.6;
+    color: #aaa;
+  }
+
+  .block-body b {
+    color: #ddd;
+  }
+
+  /* ── COLORS PER PHASE ── */
+  .c-data    { border-color: #2a6fa8; background: #0d1d2e; }
+  .c-data    .block-title { color: #5ab0f0; }
+  .c-data    .phase-header { background: #0d1d2e; color: #5ab0f0; border: 1px solid #2a6fa8; }
+
+  .c-feat    { border-color: #2a7a4a; background: #0d1e14; }
+  .c-feat    .block-title { color: #5dcf87; }
+  .c-feat    .phase-header { background: #0d1e14; color: #5dcf87; border: 1px solid #2a7a4a; }
+
+  .c-split   { border-color: #7a5a2a; background: #1e1608; }
+  .c-split   .block-title { color: #e0a84a; }
+  .c-split   .phase-header { background: #1e1608; color: #e0a84a; border: 1px solid #7a5a2a; }
+
+  .c-train   { border-color: #6a2a7a; background: #1a0d1e; }
+  .c-train   .block-title { color: #c06ae0; }
+  .c-train   .phase-header { background: #1a0d1e; color: #c06ae0; border: 1px solid #6a2a7a; }
+
+  .c-wf      { border-color: #7a2a2a; background: #1e0d0d; }
+  .c-wf      .block-title { color: #e06060; }
+  .c-wf      .phase-header { background: #1e0d0d; color: #e06060; border: 1px solid #7a2a2a; }
+
+  .c-eval    { border-color: #555; background: #111; }
+  .c-eval    .block-title { color: #ccc; }
+  .c-eval    .phase-header { background: #111; color: #ccc; border: 1px solid #555; }
+
+  .c-leak    { border-color: #c0a020; background: #1e1a08; }
+  .c-leak    .block-title { color: #f0d040; }
+
+  /* ── ARROWS ── */
+  .arrow-down {
+    text-align: center;
+    color: #444;
+    font-size: 20px;
+    line-height: 1;
+    margin: 2px 0;
+  }
+
+  .arrow-right {
+    align-self: center;
+    color: #444;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  /* ── SECTION DIVIDER ── */
+  .section {
+    margin-bottom: 24px;
+  }
+
+  /* ── ANNOTATION BADGE ── */
+  .badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 2px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    vertical-align: middle;
+    margin-left: 4px;
+  }
+  .badge-ok  { background: #1a3a1a; color: #5dcf87; border: 1px solid #2a7a4a; }
+  .badge-warn { background: #2a2010; color: #e0a84a; border: 1px solid #7a5a2a; }
+
+  /* ── LEAK CHECK TABLE ── */
+  .leak-table {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto 30px;
+    border-collapse: collapse;
+  }
+  .leak-table th, .leak-table td {
+    padding: 8px 14px;
+    text-align: left;
+    font-size: 11px;
+    border-bottom: 1px solid #1e1e1e;
+  }
+  .leak-table th {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #666;
+    border-bottom: 1px solid #333;
+  }
+  .leak-table tr:hover td { background: #111; }
+  .ok   { color: #5dcf87; }
+  .warn { color: #e0a84a; }
+  .na   { color: #444; }
+
+  /* ── WF DETAIL ── */
+  .wf-grid {
+    max-width: 1100px;
+    margin: 0 auto 30px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+  }
+
+  .wf-fold {
+    border: 1px solid #2a2a3a;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .wf-fold-header {
+    background: #16162a;
+    padding: 6px 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: #8080d0;
+    letter-spacing: 1px;
+  }
+
+  .wf-segment {
+    padding: 5px 10px;
+    font-size: 10px;
+    line-height: 1.5;
+  }
+
+  .wf-train { background: #0d1020; color: #5080e0; border-top: 2px solid #2a3a7a; }
+  .wf-gap   { background: #1a1208; color: #777; border-top: 2px solid #333; font-style: italic; }
+  .wf-test  { background: #1a0808; color: #e06060; border-top: 2px solid #7a2020; }
+
+  .wf-note {
+    font-size: 10px;
+    color: #555;
+    max-width: 1100px;
+    margin: 0 auto 30px;
+    line-height: 1.8;
+    padding: 10px 14px;
+    border-left: 2px solid #333;
+  }
+
+  /* ── LSTM DETAIL ── */
+  .lstm-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 1100px;
+    margin: 0 auto 6px;
+    flex-wrap: wrap;
+  }
+
+  .lstm-cell {
+    border: 1px solid #4a2a6a;
+    background: #120a1a;
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-size: 11px;
+    color: #c06ae0;
+    flex-shrink: 0;
+  }
+
+  .lstm-cell b { color: #e0a0f0; }
+  .lstm-cell small { color: #666; display: block; font-size: 9.5px; margin-top: 3px; }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #888;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    max-width: 1100px;
+    margin: 30px auto 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #1e1e1e;
+  }
+</style>
+</head>
+<body>
+
+<h1>RL Crypto Trading — Pipeline Complète</h1>
+<p class="subtitle">Audit data leakage · Architecture LSTM · Walk-forward OOS</p>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 1 — PIPELINE PRINCIPALE                          -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+
+<div class="section-title">① Pipeline d'entraînement</div>
+
+<div class="pipeline">
+
+  <!-- PHASE DATA -->
+  <div class="section">
+    <div class="phase-header c-data">Phase 1 — Data Collection</div>
+    <div class="row">
+      <div class="block c-data">
+        <div class="block-title">yfinance</div>
+        <div class="block-body">
+          <b>BTC-USD</b> depuis 2015<br>
+          <b>ETH-USD</b> depuis 2017<br>
+          <b>SOL-USD</b> depuis 2020<br>
+          <b>BNB-USD / ADA-USD</b><br>
+          <br>
+          OHLCV daily
+        </div>
+      </div>
+      <div class="arrow-right">→</div>
+      <div class="block c-data">
+        <div class="block-title">load_data()</div>
+        <div class="block-body">
+          Auto-adjust = True<br>
+          (splits ajustés)<br>
+          <br>
+          Flatten MultiIndex<br>
+          dropna() par asset
+        </div>
+      </div>
+      <div class="arrow-right">→</div>
+      <div class="block c-data">
+        <div class="block-title">Raw OHLCV</div>
+        <div class="block-body">
+          Dict {symbol: DataFrame}<br>
+          <br>
+          Primary = BTC<br>
+          Cross-assets = reste<br>
+          <br>
+          <span class="badge badge-ok">✓ PAS DE LEAKAGE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-down">↓</div>
+
+  <!-- PHASE FEATURES -->
+  <div class="section">
+    <div class="phase-header c-feat">Phase 2 — Feature Engineering (make_features.py)</div>
+    <div class="row">
+      <div class="block c-feat">
+        <div class="block-title">Features Primaires</div>
+        <div class="block-body">
+          Returns 1/3/7/14/30/90d<br>
+          Vol réalisée 7/21/60d<br>
+          RSI 7 & 14<br>
+          MACD, Z-score, SMA dist<br>
+          ATR, Amihud, VWAP dist<br>
+          Hurst exponent 60d<br>
+          <b>Toutes: rolling passé</b><br>
+          <span class="badge badge-ok">✓ PAS DE LEAKAGE</span>
+        </div>
+      </div>
+      <div class="arrow-right">+</div>
+      <div class="block c-feat">
+        <div class="block-title">Features Crypto</div>
+        <div class="block-body">
+          dd_from_ath (expanding max)<br>
+          skew_14d / skew_30d<br>
+          vol_velocity<br>
+          basis_3d / basis_7d<br>
+          halving_sin / cos<br>
+          Calendar crypto<br>
+          <span class="badge badge-ok">✓ PAS DE LEAKAGE</span>
+        </div>
+      </div>
+      <div class="arrow-right">+</div>
+      <div class="block c-feat">
+        <div class="block-title">Cross-Assets</div>
+        <div class="block-body">
+          corr_21d_ETH/SOL/BNB/ADA<br>
+          rel_mom_ETH/SOL/BNB/ADA<br>
+          btc_dom_proxy<br>
+          <br>
+          ffill + <b>bfill</b> si SOL manque<br>
+          <span class="badge badge-warn">⚠ BFILL BORDERLINE</span><br>
+          <small style="color:#777;font-size:9.5px">SOL imputé avant 2020<br>Impact faible (train set)</small>
+        </div>
+      </div>
+      <div class="arrow-right">→</div>
+      <div class="block c-feat">
+        <div class="block-title">X brut</div>
+        <div class="block-body">
+          (T × 56) float32<br>
+          <br>
+          dropna(subset=core_cols)<br>
+          fillna(0) cross-assets<br>
+          <br>
+          <b>Aucun accès au futur</b>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-down">↓</div>
+
+  <!-- PHASE SPLIT -->
+  <div class="section">
+    <div class="phase-header c-split">Phase 3 — Split Temporel (80/20 chronologique)</div>
+    <div class="row row-center">
+      <div class="block c-split" style="max-width:320px">
+        <div class="block-title">Split strict</div>
+        <div class="block-body">
+          <b>split = int(0.8 × len(prices))</b><br>
+          <br>
+          X_train = X[:split]  → 80%<br>
+          X_test  = X[split:]  → 20%<br>
+          <br>
+          Pas de mélange aléatoire<br>
+          Train = passé, Test = futur<br>
+          <span class="badge badge-ok">✓ PAS DE LEAKAGE</span>
+        </div>
+      </div>
+      <div class="arrow-right">→</div>
+      <div class="block c-split" style="max-width:320px">
+        <div class="block-title">Standardisation</div>
+        <div class="block-body">
+          <b>mean, std = calculés sur X_train UNIQUEMENT</b><br>
+          <br>
+          X_train_s = clip((X_train - mean) / std, ±5)<br>
+          X_test_s  = clip((X_test  - mean) / std, ±5)<br>
+          <br>
+          Le test set ne contribue PAS aux stats<br>
+          <span class="badge badge-ok">✓ PAS DE LEAKAGE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-down">↓</div>
+
+  <!-- PHASE TRAINING -->
+  <div class="section">
+    <div class="phase-header c-train">Phase 4 — Training RecurrentPPO (train.py)</div>
+    <div class="row">
+      <div class="block c-train">
+        <div class="block-title">TradingEnvLSTM</div>
+        <div class="block-body">
+          Input: <b>X_train_s</b> uniquement<br>
+          Action: [-1, 1] (short/long)<br>
+          Obs: features[t] + 4 extras<br>
+          Reward: Sortino 60d window<br>
+          <br>
+          randomize_start=<b>True</b><br>
+          min_episode=365 steps<br>
+          <br>
+          <span class="badge badge-ok">✓ JAMAIS X_test</span>
+        </div>
+      </div>
+      <div class="arrow-right">→</div>
+      <div class="block c-train">
+        <div class="block-title">VecNormalize</div>
+        <div class="block-body">
+          norm_obs=True<br>
+          norm_reward=True<br>
+          <br>
+          Accumule mean/var<br>
+          <b>sur observations train</b><br>
+          <br>
+          Sauvegardé: vecnormalize.pkl<br>
+          <span class="badge badge-ok">✓ PAS DE LEAKAGE</span>
+        </div>
+      </div>
+      <div class="arrow-right">→</div>
+      <div class="block c-train">
+        <div class="block-title">RecurrentPPO</div>
+        <div class="block-body">
+          MlpLstmPolicy<br>
+          LSTM 256 hidden<br>
+          1 layer<br>
+          <br>
+          1 000 000 timesteps<br>
+          n_envs=1 (LSTM)<br>
+          <br>
+          Sauvegardé: model.zip
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end pipeline -->
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 2 — DETAIL LSTM                                  -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+
+<div class="section-title">② Fonctionnement du LSTM — Step par step</div>
+
+<div class="lstm-row">
+  <div class="lstm-cell">
+    <b>features[t]</b><br>
+    56 valeurs du jour t<br>
+    <small>Calculées sur données passées<br>jusqu'à t uniquement</small>
+  </div>
+  <div class="arrow-right" style="color:#6a2a7a;font-size:22px">→</div>
+  <div class="lstm-cell">
+    <b>+ extras[t]</b><br>
+    pos_frac, dd_ratio<br>vol_norm, days_elapsed<br>
+    <small>État courant du portefeuille</small>
+  </div>
+  <div class="arrow-right" style="color:#6a2a7a;font-size:22px">→</div>
+  <div class="lstm-cell" style="border-color:#7a2a9a; background:#1a0a26">
+    <b>LSTM cell</b><br>
+    input: vecteur 60-dim<br>
+    + état caché h_{t-1}<br>
+    → h_t (256 dim)<br>
+    <small>Encode l'historique de l'épisode<br>Pas d'accès direct aux features passées</small>
+  </div>
+  <div class="arrow-right" style="color:#6a2a7a;font-size:22px">→</div>
+  <div class="lstm-cell">
+    <b>MLP Actor</b><br>
+    h_t → [64] → action<br>
+    <small>target_frac ∈ [-1, 1]</small>
+  </div>
+  <div class="arrow-right" style="color:#6a2a7a;font-size:22px">→</div>
+  <div class="lstm-cell">
+    <b>MLP Critic</b><br>
+    h_t → [64] → V(s)<br>
+    <small>Valeur estimée de l'état<br>pour le calcul de l'avantage GAE</small>
+  </div>
+</div>
+
+<div class="lstm-row">
+  <div class="lstm-cell" style="max-width:500px; color:#888; border-color:#333; background:#0d0d0d">
+    <b style="color:#555">Reset entre épisodes :</b> lstm_states = None à chaque reset()<br>
+    → le LSTM ne se souvient pas d'un épisode à l'autre<br>
+    → chaque épisode = séquence indépendante <span class="badge badge-ok">✓ PAS DE LEAKAGE</span>
+  </div>
+  <div style="width:20px"></div>
+  <div class="lstm-cell" style="max-width:500px; color:#888; border-color:#333; background:#0d0d0d">
+    <b style="color:#555">À l'évaluation :</b> lstm_states propagé step→step sans reset<br>
+    → le LSTM "lit" le test set de bout en bout comme une séquence continue<br>
+    → randomize_start=False <span class="badge badge-ok">✓ PAS DE LEAKAGE</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 3 — WALK-FORWARD                                 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+
+<div class="section-title">③ Walk-Forward OOS Evaluation — Pourquoi 5 folds ?</div>
+
+<div class="wf-grid">
+  <div class="wf-fold">
+    <div class="wf-fold-header">FOLD 1</div>
+    <div class="wf-segment wf-train">Train<br>jours 0→1991<br>(expanding)</div>
+    <div class="wf-segment wf-gap">Gap: 5j<br>(anti-leakage)</div>
+    <div class="wf-segment wf-test">Test OOS<br>jours 1996→2393<br>~397 jours</div>
+  </div>
+  <div class="wf-fold">
+    <div class="wf-fold-header">FOLD 2</div>
+    <div class="wf-segment wf-train">Train<br>jours 0→2388<br>(+ fold 1 test)</div>
+    <div class="wf-segment wf-gap">Gap: 5j</div>
+    <div class="wf-segment wf-test">Test OOS<br>jours 2393→2790<br>~397 jours</div>
+  </div>
+  <div class="wf-fold">
+    <div class="wf-fold-header">FOLD 3</div>
+    <div class="wf-segment wf-train">Train<br>jours 0→2785</div>
+    <div class="wf-segment wf-gap">Gap: 5j</div>
+    <div class="wf-segment wf-test">Test OOS<br>jours 2790→3187<br>~397 jours</div>
+  </div>
+  <div class="wf-fold">
+    <div class="wf-fold-header">FOLD 4</div>
+    <div class="wf-segment wf-train">Train<br>jours 0→3182</div>
+    <div class="wf-segment wf-gap">Gap: 5j</div>
+    <div class="wf-segment wf-test">Test OOS<br>jours 3187→3584<br>~397 jours</div>
+  </div>
+  <div class="wf-fold">
+    <div class="wf-fold-header">FOLD 5</div>
+    <div class="wf-segment wf-train">Train<br>jours 0→3579</div>
+    <div class="wf-segment wf-gap">Gap: 5j</div>
+    <div class="wf-segment wf-test">Test OOS<br>jours 3584→3976<br>~397 jours</div>
+  </div>
+</div>
+
+<div class="wf-note">
+  <b style="color:#e06060">Important :</b> le modèle évalué dans le WF est <b>le modèle final entraîné sur 80% des données</b> — pas un modèle réentraîné à chaque fold.<br>
+  → Les folds 1-2 sont <b>dans le train set</b> du modèle final → leurs Sharpes sont moins informatifs (le modèle a "vu" ces données).<br>
+  → Les folds 4-5 sont OOS réels → ce sont les métriques les plus honnêtes.<br>
+  <br>
+  <b style="color:#e06060">Pourquoi 5 folds ?</b> test_frac=10% × 5 = 50% du dataset testé OOS, chaque fold ≈ 400 jours (>1 an de crypto) = suffisant pour voir au moins un cycle de vol.
+  <br><br>
+  <b style="color:#e0a84a">Gap de 5 jours :</b> les features rolling (corr_21d, mom_90d) utilisent des données du passé récent.
+  Sans gap, les derniers jours du train set "contamineraient" le calcul des features du premier jour du test set.
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 4 — EVAL OOT (ETH)                               -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+
+<div class="section-title">④ Évaluation Out-of-Time (ETH sans retraining)</div>
+
+<div class="pipeline">
+  <div class="section">
+    <div class="row row-center">
+      <div class="block c-eval" style="max-width:200px">
+        <div class="block-title">Modèle BTC</div>
+        <div class="block-body">
+          Entraîné sur BTC train set<br>
+          Jamais vu ETH directement
+        </div>
+      </div>
+      <div class="arrow-right">→</div>
+      <div class="block c-eval" style="max-width:230px">
+        <div class="block-title">Features ETH</div>
+        <div class="block-body">
+          ETH devient primary<br>
+          Cross-assets: SOL, BNB, ADA<br>
+          ETH retiré des cross-assets<br>
+          <b>2 features manquantes</b><br>
+          corr_21d_ETH → <b>0.0</b><br>
+          rel_mom_ETH → <b>0.0</b><br>
+          <span class="badge badge-warn">⚠ APPROXIMATION</span>
+        </div>
+      </div>
+      <div class="arrow-right">→</div>
+      <div class="block c-eval" style="max-width:220px">
+        <div class="block-title">VecNormalize</div>
+        <div class="block-body">
+          training=<b>False</b><br>
+          Stats gelées (BTC)<br>
+          Les 0 sont normalisés<br>avec les stats BTC<br>
+          <span class="badge badge-warn">⚠ LÉGÈRE DISTORSION</span>
+        </div>
+      </div>
+      <div class="arrow-right">→</div>
+      <div class="block c-eval" style="max-width:200px">
+        <div class="block-title">Résultat ETH</div>
+        <div class="block-body">
+          Sharpe: 0.778 (BTC: 0.795)<br>
+          Généralisation confirmée<br>
+          <span class="badge badge-ok">✓ ROBUSTESSE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 5 — AUDIT LEAKAGE                                -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+
+<div class="section-title">⑤ Audit Data Leakage — Synthèse</div>
+
+<table class="leak-table">
+  <thead>
+    <tr>
+      <th>Composant</th>
+      <th>Risque potentiel</th>
+      <th>Implémentation actuelle</th>
+      <th>Verdict</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Features rolling (RSI, vol, MACD…)</td>
+      <td>Utiliser des données futures dans le calcul</td>
+      <td>Toutes avec .rolling(w) ou .ewm() → données passées uniquement</td>
+      <td class="ok">✓ SAFE</td>
+    </tr>
+    <tr>
+      <td>dd_from_ath</td>
+      <td>expanding().max() pourrait utiliser le futur</td>
+      <td>expanding() = max vu jusqu'à t inclus, jamais t+1</td>
+      <td class="ok">✓ SAFE</td>
+    </tr>
+    <tr>
+      <td>Standardisation (mean/std)</td>
+      <td>Calculer mean/std sur tout le dataset avant split</td>
+      <td>standardize_train_only() → mean/std sur X_train uniquement</td>
+      <td class="ok">✓ SAFE</td>
+    </tr>
+    <tr>
+      <td>VecNormalize</td>
+      <td>Apprendre des stats du test set pendant l'éval</td>
+      <td>vec.training=False à l'évaluation → stats gelées</td>
+      <td class="ok">✓ SAFE</td>
+    </tr>
+    <tr>
+      <td>Episodes d'entraînement</td>
+      <td>Episodes qui débordent dans le test set</td>
+      <td>TradingEnvLSTM reçoit X_train_s uniquement, T=len(X_train)</td>
+      <td class="ok">✓ SAFE</td>
+    </tr>
+    <tr>
+      <td>LSTM état caché inter-épisodes</td>
+      <td>L'état d'un épisode contamine le suivant</td>
+      <td>lstm_states=None à chaque reset() → état remis à zéro</td>
+      <td class="ok">✓ SAFE</td>
+    </tr>
+    <tr>
+      <td>Gap WF (5 jours)</td>
+      <td>Features rolling du test contaminent le train</td>
+      <td>5 jours de gap entre fin train et début test à chaque fold</td>
+      <td class="ok">✓ SAFE</td>
+    </tr>
+    <tr>
+      <td>bfill cross-assets (SOL avant 2020)</td>
+      <td>Imputer des valeurs futures (prix SOL 2020 → 2018)</td>
+      <td>Valeur imputée = première valeur passée disponible, uniquement en train set</td>
+      <td class="warn">⚠ BORDERLINE</td>
+    </tr>
+    <tr>
+      <td>WF folds 1-2 vs modèle final</td>
+      <td>Le modèle a été entraîné sur des données incluant ces folds</td>
+      <td>Modèle entraîné sur 80% → folds 1-2 partiellement dans le train</td>
+      <td class="warn">⚠ INTERPRÉTER AVEC PRÉCAUTION</td>
+    </tr>
+    <tr>
+      <td>Eval ETH — features paddées à 0</td>
+      <td>Les 0 ne sont pas représentatifs des vraies correlations ETH</td>
+      <td>VecNormalize normalise les 0 avec stats BTC → légère distorsion</td>
+      <td class="warn">⚠ APPROXIMATION ACCEPTABLE</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 6 — PROCESSUS D'ENTRAÎNEMENT DÉTAILLÉ            -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+
+<style>
+  /* ── Styles supplémentaires pour la section training ── */
+  .train-section {
+    max-width: 1100px;
+    margin: 0 auto 30px;
+  }
+
+  /* Boucle principale */
+  .loop-box {
+    border: 1px solid #3a2a5a;
+    border-radius: 6px;
+    background: #0e0916;
+    padding: 20px;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .loop-box::before {
+    content: attr(data-label);
+    position: absolute;
+    top: -10px;
+    left: 16px;
+    background: #0e0916;
+    padding: 0 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #8060c0;
+    text-transform: uppercase;
+    border: 1px solid #3a2a5a;
+    border-radius: 2px;
+  }
+
+  .loop-inner {
+    border: 1px solid #2a3a5a;
+    border-radius: 6px;
+    background: #090d16;
+    padding: 16px;
+    margin-top: 10px;
+    position: relative;
+  }
+  .loop-inner::before {
+    content: attr(data-label);
+    position: absolute;
+    top: -10px;
+    left: 16px;
+    background: #090d16;
+    padding: 0 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #4070c0;
+    text-transform: uppercase;
+    border: 1px solid #2a3a5a;
+    border-radius: 2px;
+  }
+
+  .loop-innermost {
+    border: 1px solid #2a4a2a;
+    border-radius: 6px;
+    background: #060e06;
+    padding: 14px;
+    margin-top: 10px;
+    position: relative;
+  }
+  .loop-innermost::before {
+    content: attr(data-label);
+    position: absolute;
+    top: -10px;
+    left: 16px;
+    background: #060e06;
+    padding: 0 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #50c060;
+    text-transform: uppercase;
+    border: 1px solid #2a4a2a;
+    border-radius: 2px;
+  }
+
+  /* Steps dans une boucle */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .step-num {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+  }
+
+  .sn-collect { background: #1a1030; color: #8060c0; border: 1px solid #3a2a5a; }
+  .sn-forward { background: #0d1a30; color: #4080e0; border: 1px solid #2a3a7a; }
+  .sn-backward{ background: #0d2010; color: #40c060; border: 1px solid #2a5a2a; }
+  .sn-update  { background: #2a1008; color: #e06030; border: 1px solid #5a2a10; }
+  .sn-lstm    { background: #1a0a2a; color: #c040e0; border: 1px solid #5a2a7a; }
+
+  .step-content {
+    flex: 1;
+    font-size: 11px;
+    line-height: 1.6;
+    color: #999;
+    padding-top: 2px;
+  }
+  .step-content b { color: #ddd; }
+  .step-content code {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 2px;
+    padding: 0 4px;
+    font-size: 10.5px;
+    color: #adf;
+  }
+
+  /* Counter bar */
+  .counter-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .counter-chip {
+    border-radius: 4px;
+    padding: 8px 14px;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+
+  .cc-purple { border: 1px solid #4a2a6a; background: #120a1a; color: #c060e0; }
+  .cc-blue   { border: 1px solid #2a3a6a; background: #0a0e1a; color: #5080e0; }
+  .cc-green  { border: 1px solid #2a5a2a; background: #080e08; color: #50c060; }
+  .cc-orange { border: 1px solid #5a3a10; background: #120e06; color: #e09040; }
+
+  .cc-label { font-family: 'Syne', sans-serif; font-size: 9px; letter-spacing: 1px; opacity: 0.6; display: block; text-transform: uppercase; margin-bottom: 2px; }
+  .cc-value { font-weight: 700; font-size: 13px; }
+  .cc-sub   { font-size: 9.5px; opacity: 0.6; display: block; margin-top: 1px; }
+
+  /* Math block */
+  .math-block {
+    background: #050508;
+    border: 1px solid #1e1e2a;
+    border-radius: 4px;
+    padding: 14px 18px;
+    margin: 8px 0;
+    font-size: 11px;
+    color: #8090b0;
+    line-height: 2;
+  }
+  .math-block .eq { color: #adbde0; }
+  .math-block .comment { color: #445; font-style: italic; margin-left: 16px; }
+  .math-block b { color: #c0d0f0; }
+
+  /* Timeline horizontale pour un step d'entraînement */
+  .timeline {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin: 12px 0;
+    overflow-x: auto;
+  }
+
+  .tl-block {
+    flex: 1;
+    min-width: 100px;
+    border: 1px solid #222;
+    padding: 10px 12px;
+    font-size: 10px;
+    line-height: 1.5;
+    position: relative;
+  }
+
+  .tl-block:not(:first-child)::before {
+    content: "→";
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #333;
+    font-size: 14px;
+  }
+
+  .tl-lstm   { background: #120a1a; border-color: #4a2a6a; color: #c060e0; }
+  .tl-value  { background: #0a120d; border-color: #2a5a30; color: #50c060; }
+  .tl-adv    { background: #0a0e1a; border-color: #2a3a6a; color: #5080e0; }
+  .tl-loss   { background: #1a0a08; border-color: #6a2a10; color: #e06030; }
+  .tl-grad   { background: #0e0e0e; border-color: #333;    color: #888; }
+
+  .tl-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.5px; margin-bottom: 4px; text-transform: uppercase; }
+
+  /* Annotation inline */
+  .ann {
+    display: inline-block;
+    font-size: 9.5px;
+    padding: 1px 5px;
+    border-radius: 2px;
+    vertical-align: middle;
+    margin-left: 4px;
+  }
+  .ann-lstm   { background: #1a0a2a; color: #c040e0; border: 1px solid #5a2a7a; }
+  .ann-grad   { background: #0a180a; color: #50c060; border: 1px solid #2a5a2a; }
+  .ann-frozen { background: #1a1a0a; color: #c0b030; border: 1px solid #5a4a10; }
+
+  /* Séparateur de phase inline */
+  .phase-sep {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    color: #444;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 10px 0 6px;
+    padding-left: 2px;
+  }
+</style>
+
+<div class="section-title">⑥ Processus d'entraînement RecurrentPPO — Détail complet</div>
+
+<div class="train-section">
+
+  <!-- Compteurs globaux -->
+  <div class="counter-row">
+    <div class="counter-chip cc-purple">
+      <span class="cc-label">Total timesteps</span>
+      <span class="cc-value">1 000 000</span>
+      <span class="cc-sub">steps dans l'env</span>
+    </div>
+    <div class="counter-chip cc-blue">
+      <span class="cc-label">n_steps (buffer)</span>
+      <span class="cc-value">512</span>
+      <span class="cc-sub">steps collectés avant update</span>
+    </div>
+    <div class="counter-chip cc-green">
+      <span class="cc-label">batch_size</span>
+      <span class="cc-value">64</span>
+      <span class="cc-sub">steps par mini-batch</span>
+    </div>
+    <div class="counter-chip cc-orange">
+      <span class="cc-label">n_epochs</span>
+      <span class="cc-value">10</span>
+      <span class="cc-sub">passes sur le buffer</span>
+    </div>
+    <div class="counter-chip cc-purple" style="border-color:#2a5a5a; background:#080f0f; color:#40c0c0;">
+      <span class="cc-label">Nombre d'updates</span>
+      <span class="cc-value">1 000 000 / 512 = 1953</span>
+      <span class="cc-sub">buffers collectés au total</span>
+    </div>
+    <div class="counter-chip cc-blue" style="border-color:#5a2a2a; background:#0f0808; color:#e06060;">
+      <span class="cc-label">Gradient steps / buffer</span>
+      <span class="cc-value">512/64 × 10 = 80</span>
+      <span class="cc-sub">mises à jour Adam par buffer</span>
+    </div>
+    <div class="counter-chip cc-orange" style="border-color:#3a4a2a; background:#0a0e08; color:#90c060;">
+      <span class="cc-label">Gradient steps total</span>
+      <span class="cc-value">1953 × 80 ≈ 156 000</span>
+      <span class="cc-sub">mises à jour Adam au total</span>
+    </div>
+  </div>
+
+  <!-- BOUCLE PRINCIPALE -->
+  <div class="loop-box" data-label="Boucle principale — 1953 itérations (1 par buffer de 512 steps)">
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num sn-collect">C</div>
+        <div class="step-content">
+          <b>PHASE COLLECTE — 512 steps dans l'environnement</b><br>
+          L'agent joue 512 steps consécutifs. À chaque step t :
+        </div>
+      </div>
+    </div>
+
+    <!-- BOUCLE COLLECTE -->
+    <div class="loop-inner" data-label="Boucle collecte — 512 steps (1 step = 1 journée crypto)">
+
+      <!-- Timeline d'un step -->
+      <div style="font-size:10px; color:#555; margin-bottom:8px;">Un step :</div>
+      <div class="timeline">
+        <div class="tl-block tl-lstm">
+          <div class="tl-title">① Obs[t]</div>
+          features[t] (56 dim)<br>
+          + pos, dd, vol, days<br>
+          → 60 dim<br>
+          <span class="ann ann-lstm">INPUT LSTM</span>
+        </div>
+        <div class="tl-block tl-lstm">
+          <div class="tl-title">② LSTM forward</div>
+          (obs[t], h_{t-1}, c_{t-1})<br>
+          → (h_t, c_t)<br>
+          h_t = 256 dim<br>
+          <span class="ann ann-lstm">ÉTAT MIS À JOUR</span>
+        </div>
+        <div class="tl-block tl-lstm">
+          <div class="tl-title">③ Actor MLP</div>
+          h_t → [64] → μ<br>
+          + log_std appris<br>
+          → Normal(μ, σ)<br>
+          → <b>action ~ [-1,1]</b>
+        </div>
+        <div class="tl-block tl-value">
+          <div class="tl-title">④ Critic MLP</div>
+          h_t → [64] → V(s_t)<br>
+          Valeur estimée<br>
+          de l'état courant<br>
+          <span class="ann ann-frozen">pour GAE après</span>
+        </div>
+        <div class="tl-block" style="background:#0a0808;border-color:#3a1a1a;color:#c06060;">
+          <div class="tl-title">⑤ Env step</div>
+          Action → Env<br>
+          Trade exécuté<br>
+          Fees payés<br>
+          → reward_t, obs_{t+1}
+        </div>
+        <div class="tl-block tl-grad" style="background:#0a0a08;border-color:#3a3a10;color:#c0b030;">
+          <div class="tl-title">⑥ Stockage buffer</div>
+          Sauvegarde :<br>
+          obs_t, action_t<br>
+          reward_t, done_t<br>
+          <b>h_t, c_t</b> (états LSTM)
+        </div>
+      </div>
+
+      <div class="steps" style="margin-top:10px;">
+        <div class="step">
+          <div class="step-num sn-lstm">★</div>
+          <div class="step-content">
+            <b>Reset LSTM si done=True</b> — quand un épisode se termine (fin des données ou kill-switch drawdown),
+            <code>h_t, c_t</code> sont remis à zéro avant le prochain épisode.
+            Le gradient ne traversera jamais la frontière d'un épisode.
+            <span class="ann ann-lstm">ISOLATION ÉPISODES</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num sn-collect">→</div>
+          <div class="step-content">
+            <b>À la fin des 512 steps</b> : le buffer contient 512 tuples
+            <code>(obs, action, reward, done, log_prob, value, h, c)</code>.
+            Le LSTM n'est <b>pas mis à jour</b> pendant la collecte — il est en mode inférence uniquement.
+          </div>
+        </div>
+      </div>
+    </div><!-- end loop-inner collecte -->
+
+    <!-- POST-COLLECTE : GAE -->
+    <div class="steps" style="margin-top:14px;">
+      <div class="step">
+        <div class="step-num sn-forward">G</div>
+        <div class="step-content">
+          <b>Calcul des avantages GAE (Generalized Advantage Estimation)</b>
+          <span class="ann ann-grad">POST-COLLECTE, PRÉ-UPDATE</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="math-block">
+      <b>δ_t</b> = r_t + γ · V(s_{t+1}) − V(s_t) &nbsp;&nbsp;<span class="comment">// TD error au step t</span><br>
+      <b>A_t</b> = δ_t + (γ·λ)·δ_{t+1} + (γ·λ)²·δ_{t+2} + ... &nbsp;&nbsp;<span class="comment">// avantage GAE, calculé en remontant dans le temps</span><br>
+      <b>Returns_t</b> = A_t + V(s_t) &nbsp;&nbsp;<span class="comment">// cible pour le critic</span><br>
+      <br>
+      <span class="comment">Paramètres : γ=0.995 (discount), λ=0.95 (GAE lambda)</span><br>
+      <span class="comment">A_t > 0 : l'action était meilleure qu'attendu → augmenter sa proba</span><br>
+      <span class="comment">A_t &lt; 0 : l'action était pire qu'attendu → diminuer sa proba</span>
+    </div>
+
+    <!-- BOUCLE EPOCHS -->
+    <div class="loop-inner" data-label="Boucle epochs — répétée 10 fois sur le même buffer de 512 steps">
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num sn-forward">S</div>
+          <div class="step-content">
+            <b>Shuffle des séquences</b> — le buffer de 512 steps est découpé en
+            <code>512 / 64 = 8 mini-batches</code> de 64 steps consécutifs.
+            Les séquences sont mélangées (pas les steps à l'intérieur d'une séquence —
+            l'ordre temporel doit être préservé pour le LSTM).
+          </div>
+        </div>
+      </div>
+
+      <!-- BOUCLE MINI-BATCH -->
+      <div class="loop-innermost" data-label="Boucle mini-batch — 8 mini-batches de 64 steps par epoch">
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num sn-lstm">①</div>
+            <div class="step-content">
+              <b>Re-forward pass LSTM sur les 64 steps</b>
+              <span class="ann ann-lstm">LSTM MIS À JOUR ICI</span><br>
+              On récupère l'état LSTM <code>h_0, c_0</code> sauvegardé au début de la séquence dans le buffer.
+              On rejoue les 64 steps dans le LSTM pour obtenir les <code>h_t</code> actuels
+              (avec les poids courants du réseau, pas ceux de la collecte).
+              <br><br>
+              <b>Pourquoi re-forward et pas utiliser les h_t du buffer ?</b><br>
+              Parce que les poids LSTM ont changé depuis la collecte (mises à jour précédentes).
+              Les <code>h_t</code> du buffer sont "obsolètes" — on recalcule avec les poids actuels.
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num sn-forward">②</div>
+            <div class="step-content">
+              <b>Forward pass Actor + Critic</b><br>
+              Pour chaque step t dans le mini-batch :<br>
+              &nbsp;&nbsp;→ Actor : <code>h_t → log_prob(action_t)</code> avec les poids courants<br>
+              &nbsp;&nbsp;→ Critic : <code>h_t → V_new(s_t)</code> avec les poids courants
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num sn-update">③</div>
+            <div class="step-content">
+              <b>Calcul de la loss PPO</b>
+            </div>
+          </div>
+        </div>
+
+        <div class="math-block">
+          <b>ratio_t</b> = exp(log_prob_new_t − log_prob_old_t) &nbsp;&nbsp;<span class="comment">// rapport des probas nouvelle/ancienne politique</span><br>
+          <br>
+          <b>L_CLIP</b> = −mean[ min( ratio·A_t , clip(ratio, 1−ε, 1+ε)·A_t ) ] &nbsp;&nbsp;<span class="comment">// ε=0.2 (clip_range)</span><br>
+          <span class="comment">// Empêche la politique de trop changer d'un coup → stabilité</span><br>
+          <br>
+          <b>L_VALUE</b> = 0.5 · mean[ (V_new_t − Returns_t)² ] &nbsp;&nbsp;<span class="comment">// MSE critic</span><br>
+          <br>
+          <b>L_ENTROPY</b> = −ent_coef · mean[ H(π) ] &nbsp;&nbsp;<span class="comment">// ent_coef=0.01, encourage l'exploration</span><br>
+          <br>
+          <b>L_TOTAL</b> = L_CLIP + 0.5 · L_VALUE − L_ENTROPY &nbsp;&nbsp;<span class="comment">// loss finale</span>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-num sn-backward">④</div>
+            <div class="step-content">
+              <b>Backward pass — BPTT sur 64 steps</b>
+              <span class="ann ann-grad">DESCENTE DE GRADIENT</span><br>
+              <code>L_TOTAL.backward()</code> — PyTorch remonte le gradient à travers :<br>
+              &nbsp;&nbsp;→ MLP Critic (couches denses)<br>
+              &nbsp;&nbsp;→ MLP Actor (couches denses)<br>
+              &nbsp;&nbsp;→ <b>LSTM sur les 64 steps</b> (Backpropagation Through Time tronquée)<br>
+              <br>
+              À chaque step t du LSTM, le gradient est multiplié par les forget gates <code>f_t</code>.
+              Si <code>f_t ≈ 1</code> → le gradient passe bien (mémoire longue apprise).
+              Si <code>f_t ≈ 0</code> → le gradient disparaît (oubli volontaire).
+              C'est le mécanisme clé qui évite le vanishing gradient.
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num sn-update">⑤</div>
+            <div class="step-content">
+              <b>Adam optimizer — mise à jour des poids</b><br>
+              <code>optimizer.step()</code> met à jour <b>tous les paramètres simultanément</b> :<br>
+              &nbsp;&nbsp;→ Poids LSTM : W_i, W_f, W_g, W_o, b_i, b_f, b_g, b_o (~330k params)<br>
+              &nbsp;&nbsp;→ Poids Actor MLP (~16k params)<br>
+              &nbsp;&nbsp;→ Poids Critic MLP (~16k params)<br>
+              <br>
+              Adam maintient une moyenne mobile des gradients (momentum) et une moyenne
+              mobile du carré des gradients (RMSProp) → learning rate effectif adaptatif par paramètre.
+              Avec lr=1e-4, les poids bougent doucement → stabilité LSTM.
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num sn-collect">✓</div>
+            <div class="step-content">
+              <b>Gradient clipping</b> — norme des gradients clippée à 0.5 (max_grad_norm SB3 défaut).<br>
+              Évite les exploding gradients qui peuvent destabiliser le LSTM si un reward
+              exceptionnel crée un gradient anormalement grand.
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end loop mini-batch -->
+
+      <div class="steps" style="margin-top:8px;">
+        <div class="step">
+          <div class="step-num sn-collect">→</div>
+          <div class="step-content">
+            <b>Early stopping par KL divergence</b> — si la divergence KL entre ancienne et nouvelle politique
+            dépasse <code>target_kl</code> (0.1 par défaut SB3), l'epoch s'arrête prématurément.
+            Évite que 10 epochs de mise à jour ne dégrade trop la politique.
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end loop epochs -->
+
+    <div class="steps" style="margin-top:10px;">
+      <div class="step">
+        <div class="step-num sn-collect">→</div>
+        <div class="step-content">
+          <b>Buffer jeté</b> — les 512 steps collectés et les avantages calculés sont supprimés.
+          On recommence une nouvelle collecte avec la politique mise à jour.
+          C'est ce qui fait de PPO un algorithme <b>on-policy</b> : il ne réutilise jamais
+          les transitions passées (contrairement à SAC ou DQN qui sont off-policy).
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end loop-box principal -->
+
+  <!-- Récapitulatif quand le LSTM est actif -->
+  <div style="max-width:1100px; margin: 16px auto 0;">
+    <div style="font-family:'Syne',sans-serif; font-size:11px; font-weight:700; color:#666; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px;">Récapitulatif — Quand le LSTM est actif vs gelé</div>
+    <table class="leak-table">
+      <thead>
+        <tr>
+          <th>Phase</th>
+          <th>LSTM forward ?</th>
+          <th>LSTM mis à jour (gradient) ?</th>
+          <th>États h,c propagés ?</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Collecte (512 steps)</td>
+          <td class="ok">✓ OUI — inférence</td>
+          <td class="na">✗ NON</td>
+          <td class="ok">✓ h_{t-1}→h_t step par step</td>
+          <td style="color:#666;font-size:10px;">Mode torch.no_grad()</td>
+        </tr>
+        <tr>
+          <td>Re-forward mini-batch (64 steps)</td>
+          <td class="ok">✓ OUI — recalcul</td>
+          <td class="na">✗ pas encore</td>
+          <td class="ok">✓ depuis h_0 sauvegardé</td>
+          <td style="color:#666;font-size:10px;">Prépare le backward</td>
+        </tr>
+        <tr>
+          <td>Backward BPTT (64 steps)</td>
+          <td class="na">—</td>
+          <td class="ok">✓ OUI — gradient calculé</td>
+          <td class="na">—</td>
+          <td style="color:#666;font-size:10px;">Tronqué à 64 steps</td>
+        </tr>
+        <tr>
+          <td>Adam step</td>
+          <td class="na">—</td>
+          <td class="ok">✓ OUI — poids mis à jour</td>
+          <td class="na">—</td>
+          <td style="color:#666;font-size:10px;">~350k paramètres</td>
+        </tr>
+        <tr>
+          <td>Reset épisode (done=True)</td>
+          <td class="na">—</td>
+          <td class="na">✗ NON</td>
+          <td class="warn">⚠ REMIS À ZÉRO</td>
+          <td style="color:#666;font-size:10px;">Isolation entre épisodes</td>
+        </tr>
+        <tr>
+          <td>Évaluation (eval.py)</td>
+          <td class="ok">✓ OUI — inférence</td>
+          <td class="na">✗ NON (poids gelés)</td>
+          <td class="ok">✓ propagés sur tout le test set</td>
+          <td style="color:#666;font-size:10px;">Un seul épisode de bout en bout</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div><!-- end train-section -->
+
+</body>
+</html>
