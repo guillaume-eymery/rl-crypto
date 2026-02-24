@@ -1,0 +1,32 @@
+{
+  "model_type": "lstm",
+  "rl": {
+    "total_return": 4.276312980043701,
+    "sharpe": 2.2819143199413428,
+    "sharpe_ci": [
+      0.9882459278614829,
+      3.542927313091921
+    ],
+    "sortino": 3.622990951454009,
+    "calmar": 5.624760880501517,
+    "max_drawdown": 0.20411465842851323,
+    "information_ratio": 0.8094594733382198,
+    "total_fees": 4812.470894049397,
+    "avg_turnover": 0.31524487116007927
+  },
+  "bh": {
+    "total_return": 0.5840238281250001,
+    "sharpe": 0.5941696086479106,
+    "calmar": 0.4734003522549765,
+    "max_drawdown": 0.4973881908983224
+  },
+  "random_sharpe_mean": 0.18578161051945064,
+  "permutation_test": {
+    "observed_stat": 1.4314678730950403,
+    "p_value": 0.0331,
+    "significant_5pct": true,
+    "significant_1pct": false,
+    "null_mean": -0.00634133525104167,
+    "null_std": 0.7864140156603955
+  }
+}

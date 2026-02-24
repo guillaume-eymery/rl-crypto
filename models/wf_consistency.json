@@ -1,0 +1,10 @@
+{
+  "mean_sharpe": 3.2282,
+  "std_sharpe": 2.5599,
+  "min_sharpe": 0.0265,
+  "max_sharpe": 7.4482,
+  "positive_folds_pct": 1.0,
+  "mean_calmar": 39.0057,
+  "mean_total_ret": 4.4014,
+  "consistency_score": 3.2282
+}
