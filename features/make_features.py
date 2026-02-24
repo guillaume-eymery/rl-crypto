@@ -303,3 +303,61 @@ def walk_forward_splits(n, n_splits=5, test_frac=0.10, gap=0):
         if test_end > n: break
         splits.append((np.arange(0, train_end), np.arange(test_start, test_end)))
     return splits
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Normalisation cross-market
+# ─────────────────────────────────────────────────────────────────────────────
+
+def normalize_for_target(X_target_train: np.ndarray,
+                          X_target_test: np.ndarray,
+                          X_source_train: np.ndarray | None = None,
+                          mode: str = "target",
+                          eps: float = 1e-8) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Normalise les features d'un asset cible pour l'évaluation cross-market.
+
+    Deux modes :
+      "target"  : normalise avec les stats de X_target_train (80% passé de l'asset cible)
+                  → recommandé pour l'éval cross-market, les features sont dans la bonne plage
+      "source"  : normalise avec les stats de X_source_train (train set BTC)
+                  → ce qu'on faisait avant, peut créer un décalage si les distributions diffèrent
+
+    Retourne : (X_train_norm, X_test_norm, mean, std)
+    """
+    assert mode in ("target", "source")
+
+    if mode == "source":
+        if X_source_train is None:
+            raise ValueError("mode='source' requiert X_source_train")
+        ref = X_source_train
+    else:
+        ref = X_target_train
+
+    mean = ref.mean(axis=0, keepdims=True)
+    std = ref.std(axis=0, keepdims=True) + eps
+    clip = 5.0
+    return (
+        np.clip((X_target_train - mean) / std, -clip, clip),
+        np.clip((X_target_test - mean) / std, -clip, clip),
+        mean,
+        std,
+    )
+
+
+def pad_features_to_expected(X: np.ndarray,
+                              current_names: list[str],
+                              expected_names: list[str]) -> np.ndarray:
+    """
+    Aligne les features d'un asset sur le schéma attendu par le modèle.
+    Features manquantes → colonne de zéros.
+    Features en trop → ignorées.
+    Retourne X avec exactement len(expected_names) colonnes dans le bon ordre.
+    """
+    n = len(expected_names)
+    X_out = np.zeros((X.shape[0], n), dtype=np.float32)
+    for j, fname in enumerate(expected_names):
+        if fname in current_names:
+            X_out[:, j] = X[:, current_names.index(fname)]
+        # sinon reste à 0 (feature crypto manquante sur un asset non-crypto)
+    return X_out

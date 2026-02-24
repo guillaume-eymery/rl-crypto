@@ -1,0 +1,332 @@
+[
+  {
+    "symbol": "BTC-USD",
+    "asset_class": "crypto",
+    "cross_market": false,
+    "test_steps": 773,
+    "test_start": "2024-01-12",
+    "test_end": "2026-02-24",
+    "rl": {
+      "total_return": 5.243636219770442,
+      "cagr": 1.3746232897180595,
+      "sharpe": 2.08594134600587,
+      "sharpe_ci": [
+        0.7601764653220162,
+        3.597599094514102
+      ],
+      "sortino": 3.0442123139414243,
+      "calmar": 4.477992571405165,
+      "max_drawdown": 0.3069731063190914,
+      "information_ratio": 0.9138095762002403,
+      "total_fees": 17326.451636279624,
+      "avg_turnover": 0.6195133839009098,
+      "win_rate": 0.5284974093264249
+    },
+    "bh": {
+      "total_return": 0.5788656249999999,
+      "sharpe": 0.6032776166648941,
+      "max_drawdown": 0.49738818497120996
+    },
+    "random_sharpe_mean": -0.9578262239711085,
+    "random_sharpe_std": 0.918670886416791,
+    "permutation_p": 0.0593,
+    "significant": false
+  },
+  {
+    "symbol": "ETH-USD",
+    "asset_class": "crypto",
+    "cross_market": true,
+    "test_steps": 202,
+    "test_start": "2024-08-08",
+    "test_end": "2026-02-24",
+    "rl": {
+      "total_return": -0.34535196082924724,
+      "cagr": -0.5349078862408017,
+      "sharpe": -1.0557576512384046,
+      "sharpe_ci": [
+        -3.737449704860713,
+        1.538451528920097
+      ],
+      "sortino": -1.5917750468455265,
+      "calmar": -1.18441697250516,
+      "max_drawdown": 0.4516212606354484,
+      "information_ratio": -0.7741267271337773,
+      "total_fees": 864.9431843325385,
+      "avg_turnover": 0.4780135817325436,
+      "win_rate": 0.46766169154228854
+    },
+    "bh": {
+      "total_return": -0.07071757812500001,
+      "sharpe": 0.04495324766875347,
+      "max_drawdown": 0.37750609861840967
+    },
+    "random_sharpe_mean": -0.682577744278278,
+    "random_sharpe_std": 0.9524936756711357,
+    "permutation_p": 0.7167,
+    "significant": false
+  },
+  {
+    "symbol": "SOL-USD",
+    "asset_class": "crypto",
+    "cross_market": true,
+    "test_steps": 365,
+    "test_start": "2025-02-23",
+    "test_end": "2026-02-24",
+    "rl": {
+      "total_return": 0.49276355363447455,
+      "cagr": 0.49276355363447455,
+      "sharpe": 0.8524103706963709,
+      "sharpe_ci": [
+        -1.0314877225071877,
+        2.7592376334232807
+      ],
+      "sortino": 1.3118515755222586,
+      "calmar": 1.3078905543852954,
+      "max_drawdown": 0.376762070788157,
+      "information_ratio": 0.8918447852081905,
+      "total_fees": 2764.50522986568,
+      "avg_turnover": 0.5965915718524861,
+      "win_rate": 0.532967032967033
+    },
+    "bh": {
+      "total_return": -0.507308349609375,
+      "sharpe": -0.44982492135518026,
+      "max_drawdown": 0.6842661637680394
+    },
+    "random_sharpe_mean": -2.125399074972454,
+    "random_sharpe_std": 3.5803719868998445,
+    "permutation_p": 0.174,
+    "significant": false
+  },
+  {
+    "symbol": "AVAX-USD",
+    "asset_class": "crypto",
+    "cross_market": true,
+    "test_steps": 355,
+    "test_start": "2025-03-05",
+    "test_end": "2026-02-24",
+    "rl": {
+      "total_return": -0.061329889052525455,
+      "cagr": -0.0630019062986884,
+      "sharpe": 0.2854634633057479,
+      "sharpe_ci": [
+        -1.7459909758938905,
+        1.990648973657388
+      ],
+      "sortino": 0.47435952676663606,
+      "calmar": -0.1309513190231854,
+      "max_drawdown": 0.4811093677302608,
+      "information_ratio": 0.6669906576158102,
+      "total_fees": 1953.4514462198365,
+      "avg_turnover": 0.5676587764729548,
+      "win_rate": 0.4830508474576271
+    },
+    "bh": {
+      "total_return": -0.5917125,
+      "sharpe": -0.6456596030049918,
+      "max_drawdown": 0.7644409503109035
+    },
+    "random_sharpe_mean": -1.8205288997166922,
+    "random_sharpe_std": 3.8457799837045656,
+    "permutation_p": 0.2607,
+    "significant": false
+  },
+  {
+    "symbol": "LINK-USD",
+    "asset_class": "crypto",
+    "cross_market": true,
+    "test_steps": 269,
+    "test_start": "2024-10-30",
+    "test_end": "2026-02-24",
+    "rl": {
+      "total_return": -0.4565933448773828,
+      "cagr": -0.5628836461195887,
+      "sharpe": -0.3481096874767309,
+      "sharpe_ci": [
+        -2.455913378876321,
+        1.9854827691694785
+      ],
+      "sortino": -0.44196027930606413,
+      "calmar": -1.1063862749808193,
+      "max_drawdown": 0.5087587028584091,
+      "information_ratio": -0.9216586899936329,
+      "total_fees": 1188.8288835271828,
+      "avg_turnover": 0.5982664962992429,
+      "win_rate": 0.47388059701492535
+    },
+    "bh": {
+      "total_return": 0.47571240234375,
+      "sharpe": 0.9767809445497635,
+      "max_drawdown": 0.6275287347723334
+    },
+    "random_sharpe_mean": -2.881287206071012,
+    "random_sharpe_std": 3.245423920058487,
+    "permutation_p": 0.7824,
+    "significant": false
+  },
+  {
+    "symbol": "SPY",
+    "asset_class": "equity",
+    "cross_market": true,
+    "test_steps": 1022,
+    "test_start": "2022-01-25",
+    "test_end": "2026-02-24",
+    "rl": {
+      "total_return": 0.48883386031746734,
+      "cagr": 0.10311202833726174,
+      "sharpe": 0.4244733052275938,
+      "sharpe_ci": [
+        -0.5218270328858131,
+        1.4171400286565805
+      ],
+      "sortino": 0.6455084297419523,
+      "calmar": 0.6109667749528591,
+      "max_drawdown": 0.1687686345058905,
+      "information_ratio": -0.12681873575531424,
+      "total_fees": 1474.7637074507825,
+      "avg_turnover": 0.5712841943639552,
+      "win_rate": 0.4975514201762977
+    },
+    "bh": {
+      "total_return": 0.677553125,
+      "sharpe": 0.580869828407074,
+      "max_drawdown": 0.22094845117454173
+    },
+    "random_sharpe_mean": -0.6554093064622679,
+    "random_sharpe_std": 0.5915068287282397,
+    "permutation_p": 0.5782,
+    "significant": false
+  },
+  {
+    "symbol": "QQQ",
+    "asset_class": "equity",
+    "cross_market": true,
+    "test_steps": 1022,
+    "test_start": "2022-01-25",
+    "test_end": "2026-02-24",
+    "rl": {
+      "total_return": 0.896467633587045,
+      "cagr": 0.17093959245967283,
+      "sharpe": 0.6376092396157065,
+      "sharpe_ci": [
+        -0.3992980985842278,
+        1.5977293457777033
+      ],
+      "sortino": 0.9957854463263762,
+      "calmar": 0.6625439912732527,
+      "max_drawdown": 0.25800489433338214,
+      "information_ratio": 0.028725187147426914,
+      "total_fees": 1650.6384541880007,
+      "avg_turnover": 0.5467633329214123,
+      "win_rate": 0.5210577864838394
+    },
+    "bh": {
+      "total_return": 0.8091460937499999,
+      "sharpe": 0.5716142621870622,
+      "max_drawdown": 0.2956174014071971
+    },
+    "random_sharpe_mean": -0.7214044370522906,
+    "random_sharpe_std": 0.4198793369170117,
+    "permutation_p": 0.4539,
+    "significant": false
+  },
+  {
+    "symbol": "^GDAXI",
+    "asset_class": "equity",
+    "cross_market": true,
+    "test_steps": 668,
+    "test_start": "2021-12-29",
+    "test_end": "2026-02-23",
+    "rl": {
+      "total_return": -0.2356199060348898,
+      "cagr": -0.09639425515589273,
+      "sharpe": -0.6575921348352666,
+      "sharpe_ci": [
+        -1.7330586747361698,
+        0.5387053140808838
+      ],
+      "sortino": -0.764694119516657,
+      "calmar": -0.2858581470804433,
+      "max_drawdown": 0.33721010277438906,
+      "information_ratio": -0.5298372267499576,
+      "total_fees": 1132.4381616196915,
+      "avg_turnover": 0.5849794178819867,
+      "win_rate": 0.49025487256371814
+    },
+    "bh": {
+      "total_return": 0.1112082031249999,
+      "sharpe": 0.08644933339040517,
+      "max_drawdown": 0.264028207447391
+    },
+    "random_sharpe_mean": -1.263030940813122,
+    "random_sharpe_std": 0.5476789057352612,
+    "permutation_p": 0.8033,
+    "significant": false
+  },
+  {
+    "symbol": "GC=F",
+    "asset_class": "commodity",
+    "cross_market": true,
+    "test_steps": 387,
+    "test_start": "2022-01-27",
+    "test_end": "2025-06-17",
+    "rl": {
+      "total_return": -0.02691154927665773,
+      "cagr": -0.017607065328736682,
+      "sharpe": -0.26458831746224215,
+      "sharpe_ci": [
+        -2.0402495926642477,
+        1.2328779158818846
+      ],
+      "sortino": -0.4472446094139507,
+      "calmar": -0.08465708881961806,
+      "max_drawdown": 0.20798099219136507,
+      "information_ratio": -0.6648235558950705,
+      "total_fees": 629.9681276767699,
+      "avg_turnover": 0.4954536120150226,
+      "win_rate": 0.49740932642487046
+    },
+    "bh": {
+      "total_return": 0.2364913085937499,
+      "sharpe": 0.6599662581319754,
+      "max_drawdown": 0.20430374007351365
+    },
+    "random_sharpe_mean": -0.8931634779091745,
+    "random_sharpe_std": 0.5817915364086607,
+    "permutation_p": 0.7808,
+    "significant": false
+  },
+  {
+    "symbol": "CL=F",
+    "asset_class": "commodity",
+    "cross_market": true,
+    "test_steps": 448,
+    "test_start": "2021-06-09",
+    "test_end": "2025-06-17",
+    "rl": {
+      "total_return": -0.16533542019539016,
+      "cagr": -0.09666156059350062,
+      "sharpe": -0.13790214095863554,
+      "sharpe_ci": [
+        -1.5986119399118057,
+        1.2967284627126339
+      ],
+      "sortino": -0.23106826547780213,
+      "calmar": -0.23843411388344082,
+      "max_drawdown": 0.405401555252089,
+      "information_ratio": -0.1486465632882729,
+      "total_fees": 1295.8041348363943,
+      "avg_turnover": 0.5121421486909806,
+      "win_rate": 0.48322147651006714
+    },
+    "bh": {
+      "total_return": -0.033161816406250044,
+      "sharpe": 0.07980764384786483,
+      "max_drawdown": 0.4604688860917635
+    },
+    "random_sharpe_mean": -0.7061163399785084,
+    "random_sharpe_std": 0.7328113684068096,
+    "permutation_p": 0.5709,
+    "significant": false
+  }
+]

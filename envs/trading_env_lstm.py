@@ -56,6 +56,7 @@ class TradingEnvLSTM(gym.Env):
         max_drawdown_kill: float = 0.40,   # 40% : crypto est plus volatile
         randomize_start: bool = True,
         min_episode_steps: int = 365,      # 1 an minimum (crypto = 365j)
+        annual_days: int = 365,
     ):
         super().__init__()
         assert len(features) == len(prices)
@@ -74,9 +75,9 @@ class TradingEnvLSTM(gym.Env):
         self.max_drawdown_kill = float(max_drawdown_kill)
         self.randomize_start = randomize_start
         self.min_episode_steps = min_episode_steps
+        self.annual_days = int(annual_days)
 
         self.T, self.F = self.features.shape
-        self.annual_days = 365  # crypto
 
         obs_dim = self.F + 4
         self.observation_space = spaces.Box(
