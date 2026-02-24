@@ -1293,6 +1293,484 @@
   </div>
 
 </div><!-- end train-section -->
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 7 — ARCHITECTURE NEURONALE                       -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<style>
+/* ── SECTION 7 + 8 STYLES ── */
+.s78-wrap { max-width:1160px; margin:0 auto 40px; }
+
+/* ─── Neurone SVG-like HTML ─── */
+.arch-diagram {
+  display:flex; align-items:center; gap:0;
+  overflow-x:auto; padding:24px 0 16px;
+  justify-content:flex-start;
+}
+
+/* Colonne = une couche */
+.arch-col { display:flex; flex-direction:column; align-items:center; flex-shrink:0; }
+.arch-col-lbl {
+  font-family:'Syne',sans-serif; font-size:9px; font-weight:700;
+  letter-spacing:1.5px; text-transform:uppercase; color:#444;
+  margin-bottom:10px; text-align:center; min-width:80px;
+}
+
+/* Bloc de couche */
+.arch-layer {
+  border:1px solid; border-radius:5px;
+  padding:10px 8px; display:flex; flex-direction:column;
+  align-items:center; gap:4px; min-width:88px; position:relative;
+}
+.arch-lname {
+  font-family:'Syne',sans-serif; font-size:9px; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.5px;
+  text-align:center; margin-bottom:4px;
+}
+.nrn { /* neurone */
+  width:13px; height:13px; border-radius:50%; border:1px solid; flex-shrink:0;
+}
+.ndot { font-size:9px; color:#3a3a3a; line-height:1.3; }
+.adim {
+  font-family:'JetBrains Mono',monospace; font-size:9px; color:#444;
+  background:#080808; border:1px solid #1c1c1c; border-radius:2px;
+  padding:1px 5px; margin-top:4px;
+}
+.asub { font-size:8.5px; color:#3a3a3a; text-align:center; margin-top:3px; line-height:1.5; }
+
+/* Couleurs */
+.al-input  { border-color:#244468; background:#070d18; }
+.al-input  .arch-lname { color:#4a88cc; }
+.al-input  .nrn { background:#0c1c38; border-color:#2a5a90; }
+
+.al-lstm   { border-color:#502880; background:#0f0718; }
+.al-lstm   .arch-lname { color:#9848d8; }
+.al-lstm   .nrn { background:#1c0838; border-color:#6828a8; }
+
+.al-actor  { border-color:#604010; background:#100c04; }
+.al-actor  .arch-lname { color:#c09828; }
+.al-actor  .nrn { background:#1c1404; border-color:#886818; }
+
+.al-critic { border-color:#104840; background:#040e0c; }
+.al-critic .arch-lname { color:#28b890; }
+.al-critic .nrn { background:#041c18; border-color:#189870; }
+
+.al-out-a  { border-color:#805010; background:#140c04; }
+.al-out-a  .arch-lname { color:#d07818; }
+
+.al-out-c  { border-color:#106848; background:#041008; }
+.al-out-c  .arch-lname { color:#18c880; }
+
+.al-env    { border-color:#402010; background:#0c0804; }
+.al-env    .arch-lname { color:#b04818; }
+
+/* Flèche entre colonnes */
+.arch-arr {
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; flex-shrink:0; padding:0 5px; margin-top:44px;
+}
+.arr-line {
+  position:relative; width:28px; height:1px; background:#2a2a2a;
+}
+.arr-line::after {
+  content:''; position:absolute; right:-1px; top:-3px;
+  border-left:6px solid #2a2a2a;
+  border-top:4px solid transparent; border-bottom:4px solid transparent;
+}
+.arr-lbl { font-size:8.5px; color:#383838; margin-top:3px; white-space:nowrap; }
+
+/* Double flèche (h_t va vers Actor ET Critic) */
+.arch-split-arr {
+  display:flex; flex-direction:column; align-items:center;
+  flex-shrink:0; padding:0 5px;
+}
+.split-line-up, .split-line-dn {
+  width:24px; height:1px; background:#2a2a2a; position:relative;
+}
+.split-line-up { transform-origin:right center; transform:rotate(-25deg); margin-bottom:2px; }
+.split-line-dn { transform-origin:right center; transform:rotate(25deg); margin-top:2px; }
+.split-line-up::after, .split-line-dn::after {
+  content:''; position:absolute; right:-1px; top:-3px;
+  border-left:5px solid #2a2a2a;
+  border-top:3px solid transparent; border-bottom:3px solid transparent;
+}
+.split-gap { height:48px; }
+
+/* Colonne actor+critic empilées */
+.arch-stacked { display:flex; flex-direction:column; gap:14px; flex-shrink:0; }
+
+/* ─── Gates LSTM ─── */
+.gates-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;
+}
+.gate {
+  border:1px solid; border-radius:4px; padding:10px 13px;
+}
+.gate-ttl {
+  font-family:'Syne',sans-serif; font-size:9.5px; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;
+}
+.gate-eq  { font-size:10px; color:#777; font-family:'JetBrains Mono',monospace; line-height:1.9; }
+.gate-eq b { color:#bbb; }
+.gate-role { font-size:9.5px; color:#484848; margin-top:5px; line-height:1.5; }
+.gf { border-color:#4a1818; background:#0c0404; } .gf .gate-ttl { color:#d84848; }
+.gi { border-color:#184a18; background:#040c04; } .gi .gate-ttl { color:#48d848; }
+.gc { border-color:#4a4a14; background:#0c0c04; } .gc .gate-ttl { color:#c8c838; }
+.go { border-color:#18184a; background:#04040c; } .go .gate-ttl { color:#4848d8; }
+
+/* Params box */
+.params-box {
+  background:#040404; border:1px solid #181820; border-radius:4px;
+  padding:12px 16px; margin-top:12px;
+  font-size:10.5px; color:#585858; line-height:2.1;
+}
+
+/* Flux résumé */
+.flux-row {
+  display:flex; align-items:center; gap:5px; flex-wrap:wrap;
+  margin:14px 0 4px; font-size:10px;
+}
+.flux-box {
+  border:1px solid; border-radius:4px; padding:8px 12px; flex-shrink:0;
+}
+.flux-arr { color:#2c2c2c; font-size:16px; }
+
+/* ─── SECTION 8 MLflow ─── */
+.mlf-intro { font-size:11px; color:#4a4a4a; margin-bottom:16px; line-height:1.9; }
+.mlf-intro code {
+  background:#0c0c0c; border:1px solid #1c1c1c; border-radius:2px;
+  padding:0 5px; font-size:10px; color:#7a9ab8;
+}
+.mlf-grid {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(310px,1fr));
+  gap:10px; margin-bottom:14px;
+}
+.mlf-card { border:1px solid; border-radius:5px; padding:14px 16px; }
+.mlf-ttl {
+  font-family:'Syne',sans-serif; font-size:10.5px; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;
+}
+.mc-ppo   { border-color:#243460; background:#050810; } .mc-ppo   .mlf-ttl { color:#4868c8; }
+.mc-trd   { border-color:#245440; background:#040e0a; } .mc-trd   .mlf-ttl { color:#48b878; }
+.mc-ok    { border-color:#185818; background:#040c04; } .mc-ok    .mlf-ttl { color:#58c858; }
+.mc-bad   { border-color:#581818; background:#0c0404; } .mc-bad   .mlf-ttl { color:#d85858; }
+
+.mrow {
+  display:flex; justify-content:space-between; align-items:baseline;
+  padding:5px 0; border-bottom:1px solid #0e0e0e; gap:10px;
+}
+.mrow:last-child { border-bottom:none; }
+.mname { font-size:10px; color:#686868; flex-shrink:0; }
+.mname code {
+  background:#0c0c0c; border:1px solid #1c1c1c; border-radius:2px;
+  padding:0 4px; font-size:9.5px; color:#7a9ab8;
+}
+.mval  { font-size:10px; color:#444; text-align:right; flex:1; line-height:1.4; }
+
+/* SVG curves grid */
+.crv-grid {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  gap:9px; margin:14px 0;
+}
+.crv-card {
+  background:#040406; border:1px solid #141418; border-radius:4px; padding:12px;
+}
+.crv-ttl {
+  font-family:'Syne',sans-serif; font-size:9px; font-weight:700;
+  color:#484848; letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;
+}
+.crv-sub { font-size:9px; color:#383838; margin-top:5px; line-height:1.4; }
+
+/* Diag table */
+.dtbl { width:100%; border-collapse:collapse; margin-top:4px; }
+.dtbl th,.dtbl td { padding:7px 12px; text-align:left; font-size:10.5px; border-bottom:1px solid #0e0e0e; }
+.dtbl th {
+  font-family:'Syne',sans-serif; font-size:8.5px; letter-spacing:1px;
+  text-transform:uppercase; color:#484848; border-bottom:1px solid #1e1e1e;
+}
+.dtbl tr:hover td { background:#080808; }
+.dobs { color:#d86868; }
+.dmean { color:#686868; }
+.dfix { color:#58c858; }
+</style>
+
+<div class="section-title">⑦ Architecture Neuronale — Actor-Critic LSTM</div>
+
+<div class="s78-wrap">
+
+  <!-- ── DIAGRAMME PRINCIPAL ── -->
+  <div class="arch-diagram">
+
+    <!-- INPUT -->
+    <div class="arch-col">
+      <div class="arch-col-lbl">Input<br>jour t</div>
+      <div class="arch-layer al-input">
+        <div class="arch-lname">Observation</div>
+        <div class="nrn"></div>
+        <div class="nrn"></div>
+        <div class="nrn"></div>
+        <div class="ndot">·<br>·<br>·<br>·</div>
+        <div class="nrn"></div>
+        <!-- extras portfolio en vert -->
+        <div class="nrn" style="border-color:#386828;background:#0a1808;"></div>
+        <div class="nrn" style="border-color:#386828;background:#0a1808;"></div>
+        <div class="nrn" style="border-color:#386828;background:#0a1808;"></div>
+        <div class="nrn" style="border-color:#386828;background:#0a1808;"></div>
+        <div class="adim">60 dim</div>
+        <div class="asub">
+          56 features<br>
+          <span style="color:#386828;">+ 4 extras</span><br>
+          pos · dd · vol · days
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-arr">
+      <div class="arr-line"></div>
+      <div class="arr-lbl">x_t</div>
+    </div>
+
+    <!-- LSTM -->
+    <div class="arch-col">
+      <div class="arch-col-lbl">Mémoire<br>temporelle</div>
+      <div class="arch-layer al-lstm" style="min-width:105px;">
+        <div class="arch-lname">LSTM Cell</div>
+        <!-- gates symboliques -->
+        <div style="display:flex;gap:3px;margin:5px 0 2px;">
+          <div style="width:10px;height:10px;border-radius:2px;background:#2c0808;border:1px solid #882828;" title="forget"></div>
+          <div style="width:10px;height:10px;border-radius:2px;background:#082c08;border:1px solid #288828;" title="input"></div>
+          <div style="width:10px;height:10px;border-radius:2px;background:#282808;border:1px solid #888820;" title="cell"></div>
+          <div style="width:10px;height:10px;border-radius:2px;background:#08082c;border:1px solid #282888;" title="output"></div>
+        </div>
+        <div style="font-size:8px;color:#484848;margin-bottom:5px;">f · i · c · o</div>
+        <div class="nrn" style="width:10px;height:10px;"></div>
+        <div class="nrn" style="width:10px;height:10px;"></div>
+        <div class="ndot" style="font-size:8px;">·<br>·<br>·</div>
+        <div class="nrn" style="width:10px;height:10px;"></div>
+        <div class="adim">256 hidden</div>
+        <div class="asub">
+          + h_{t-1} (256)<br>
+          + c_{t-1} (256)<br>
+          → h_t · c_t
+        </div>
+      </div>
+    </div>
+
+    <!-- FLÈCHE split -->
+    <div class="arch-arr" style="margin-top:0;padding:0 8px;align-self:center;">
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:28px;">
+        <div style="display:flex;align-items:center;gap:3px;">
+          <div style="width:24px;height:1px;background:#2a2a2a;position:relative;">
+            <div style="position:absolute;right:-1px;top:-3px;border-left:5px solid #2a2a2a;border-top:3px solid transparent;border-bottom:3px solid transparent;"></div>
+          </div>
+        </div>
+        <div style="font-size:8px;color:#383838;text-align:right;margin-top:-24px;padding-right:4px;">h_t<br>(256)</div>
+        <div style="display:flex;align-items:center;gap:3px;">
+          <div style="width:24px;height:1px;background:#2a2a2a;position:relative;">
+            <div style="position:absolute;right:-1px;top:-3px;border-left:5px solid #2a2a2a;border-top:3px solid transparent;border-bottom:3px solid transparent;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTOR + CRITIC empilés -->
+    <div class="arch-col" style="gap:14px;">
+      <div class="arch-col-lbl">Têtes séparées<br>(partagent h_t)</div>
+      <div class="arch-stacked">
+
+        <!-- ACTOR -->
+        <div style="display:flex;align-items:center;gap:0;">
+          <div class="arch-layer al-actor">
+            <div class="arch-lname">Actor MLP</div>
+            <div class="nrn"></div>
+            <div class="nrn"></div>
+            <div class="ndot">·<br>·</div>
+            <div class="nrn"></div>
+            <div class="adim">64 units</div>
+            <div class="asub">ReLU</div>
+          </div>
+          <div class="arch-arr" style="margin-top:0;">
+            <div class="arr-line"></div>
+          </div>
+          <div class="arch-layer al-out-a" style="min-width:100px;">
+            <div class="arch-lname">Out Actor</div>
+            <div class="nrn" style="width:18px;height:18px;border-color:#c06818;background:#1c0c04;"></div>
+            <div class="adim">1 dim</div>
+            <div class="asub">
+              μ, log_σ<br>
+              → Normal(μ,σ)<br>
+              → tanh<br>
+              <span style="color:#d07818;font-weight:700;">target_frac</span><br>
+              ∈ [-1 , +1]<br>
+              ex: 0.65 = 65% long
+            </div>
+          </div>
+        </div>
+
+        <!-- CRITIC -->
+        <div style="display:flex;align-items:center;gap:0;">
+          <div class="arch-layer al-critic">
+            <div class="arch-lname">Critic MLP</div>
+            <div class="nrn"></div>
+            <div class="nrn"></div>
+            <div class="ndot">·<br>·</div>
+            <div class="nrn"></div>
+            <div class="adim">64 units</div>
+            <div class="asub">ReLU</div>
+          </div>
+          <div class="arch-arr" style="margin-top:0;">
+            <div class="arr-line"></div>
+          </div>
+          <div class="arch-layer al-out-c" style="min-width:100px;">
+            <div class="arch-lname">Out Critic</div>
+            <div class="nrn" style="width:18px;height:18px;border-color:#18b880;background:#041c10;"></div>
+            <div class="adim">1 dim</div>
+            <div class="asub">
+              V(s_t)<br>
+              reward futur<br>
+              <span style="color:#18c880;font-weight:700;">estimé</span><br>
+              ex: 2.3 = bon état<br>
+              (ne trade pas)
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end stacked -->
+    </div>
+
+    <!-- FLÈCHE → ENV (seulement pour Actor) -->
+    <div class="arch-arr" style="align-self:flex-start;margin-top:130px;">
+      <div class="arr-line"></div>
+      <div class="arr-lbl">action</div>
+    </div>
+
+    <!-- ENV -->
+    <div class="arch-col" style="align-self:flex-start;margin-top:86px;">
+      <div class="arch-col-lbl">Résultat</div>
+      <div class="arch-layer al-env">
+        <div class="arch-lname">Env step</div>
+        <div class="asub" style="margin-top:6px;">
+          trade exécuté<br>
+          fees payés<br>
+          ↓<br>
+          reward_t<br>
+          obs_{t+1}<br>
+          done?
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end arch-diagram -->
+
+  <!-- Légende -->
+  <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:10px;color:#585858;margin:2px 0 22px;">
+    <span style="color:#4a88cc;">■ Input 60 dim</span>
+    <span style="color:#9848d8;">■ LSTM 256 — encode l'historique temporel</span>
+    <span style="color:#c09828;">■ Actor 64 — prend la décision de trade</span>
+    <span style="color:#28b890;">■ Critic 64 — évalue la qualité de la situation</span>
+    <span style="color:#386828;">■ Extras portfolio (état du compte)</span>
+  </div>
+
+  <!-- ── DETAIL LSTM GATES ── -->
+  <div style="border:1px solid #402070;border-radius:6px;background:#0c0618;padding:16px 20px;margin-bottom:18px;">
+    <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:#7840c0;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">
+      Intérieur de la cellule LSTM — les 4 portes (gates)
+    </div>
+    <div style="font-size:10.5px;color:#505050;margin-bottom:12px;">
+      Chaque step t : x_t (60 dim) + h_{t-1} (256 dim) sont concaténés → vecteur 316 dim.
+      Multiplié par 4 matrices de poids → 4 gates qui contrôlent la mémoire.
+    </div>
+    <div class="gates-grid">
+      <div class="gate gf">
+        <div class="gate-ttl">🔴 Forget Gate f_t — Qu'est-ce qu'on oublie ?</div>
+        <div class="gate-eq">
+          <b>f_t</b> = σ( W_f · [h_{t-1}, x_t] + b_f )<br>
+          sortie ∈ [0, 1] par dimension
+        </div>
+        <div class="gate-role">
+          f=0 → efface tout de c_{t-1}.&nbsp;&nbsp;f=1 → garde tout.<br>
+          <b>Concrètement :</b> le marché passe de bull à bear →
+          la gate efface progressivement le contexte "on est en tendance haussière".
+        </div>
+      </div>
+      <div class="gate gi">
+        <div class="gate-ttl">🟢 Input Gate i_t + g_t — Quoi mémoriser ?</div>
+        <div class="gate-eq">
+          <b>i_t</b> = σ( W_i · [h_{t-1}, x_t] ) &nbsp;→ "à quel point"<br>
+          <b>g_t</b> = tanh( W_g · [h_{t-1}, x_t] ) → "quelle valeur"
+        </div>
+        <div class="gate-role">
+          Les deux ensembles décident ce qui entre dans la mémoire longue.<br>
+          <b>Concrètement :</b> RSI monte à 92 + volume spike → mémorise
+          "signal de surchauffe".
+        </div>
+      </div>
+      <div class="gate gc">
+        <div class="gate-ttl">🟡 Cell State c_t — La mémoire longue</div>
+        <div class="gate-eq">
+          <b>c_t</b> = f_t ⊙ c_{t-1} + i_t ⊙ g_t
+        </div>
+        <div class="gate-role">
+          Peut rester stable des centaines de steps sans s'effacer.
+          Le gradient remonte directement à travers c_t sans multiplication
+          répétée → <b>pas de vanishing gradient</b>.<br>
+          <b>Concrètement :</b> "on est en bear market depuis 6 mois, drawdown -40%".
+        </div>
+      </div>
+      <div class="gate go">
+        <div class="gate-ttl">🔵 Output Gate o_t — Quoi exposer ?</div>
+        <div class="gate-eq">
+          <b>o_t</b> = σ( W_o · [h_{t-1}, x_t] )<br>
+          <b>h_t</b> = o_t ⊙ tanh( c_t ) &nbsp;→ 256 dim → Actor + Critic
+        </div>
+        <div class="gate-role">
+          Filtre ce qu'on révèle de la mémoire longue à chaque step.<br>
+          <b>Concrètement :</b> expose "contexte bear" à l'Actor seulement
+          quand c'est pertinent pour la décision du moment.
+        </div>
+      </div>
+    </div>
+    <!-- Compte des paramètres -->
+    <div class="params-box">
+      <span style="font-family:'Syne',sans-serif;font-size:9px;font-weight:700;color:#604090;letter-spacing:1px;text-transform:uppercase;">Compte des paramètres</span><br>
+      LSTM &nbsp;&nbsp;: 4 matrices × (60+256) × 256 + 4 × 256 biases = <b style="color:#9848d8;">330 752 params</b><br>
+      Actor MLP : 256×64 + 64 + 64×1 + 1 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = <b style="color:#c09828;">&nbsp;16 449 params</b><br>
+      Critic MLP : 256×64 + 64 + 64×1 + 1 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = <b style="color:#28b890;">&nbsp;16 449 params</b><br>
+      <b style="color:#ddd;">Total ≈ 363 650 paramètres</b> — petit réseau, quelques heures CPU pour converger.
+    </div>
+  </div>
+
+  <!-- Flux résumé -->
+  <div style="font-family:'Syne',sans-serif;font-size:9px;font-weight:700;color:#484848;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Flux complet d'un step t → décision</div>
+  <div class="flux-row">
+    <div class="flux-box" style="border-color:#244468;background:#060c16;color:#4a88cc;">
+      features[t]<br><span style="color:#2c3c50;font-size:8.5px;">56 chiffres du jour t</span>
+    </div>
+    <span class="flux-arr">+</span>
+    <div class="flux-box" style="border-color:#284818;background:#060c04;color:#386828;">
+      portfolio[t]<br><span style="color:#1c2c10;font-size:8.5px;">pos, dd, vol, days</span>
+    </div>
+    <span class="flux-arr">→</span>
+    <div class="flux-box" style="border-color:#502880;background:#0c0618;color:#9848d8;">
+      LSTM<br><span style="color:#381860;font-size:8.5px;">+ h_{t-1}, c_{t-1}</span><br>→ h_t (contexte)
+    </div>
+    <span class="flux-arr">→</span>
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <div class="flux-box" style="border-color:#604010;background:#0e0c04;color:#c09828;font-size:10px;">
+        Actor → <b>target_frac ∈ [-1,1]</b>&nbsp;&nbsp;ex: 0.65 = 65% long BTC
+      </div>
+      <div class="flux-box" style="border-color:#104840;background:#040e0c;color:#28b890;font-size:10px;">
+        Critic → <b>V(s_t)</b>&nbsp;&nbsp;ex: 2.3 → situation favorable
+      </div>
+    </div>
+    <span class="flux-arr">→</span>
+    <div class="flux-box" style="border-color:#402010;background:#0c0804;color:#b04818;">
+      Env step<br><span style="font-size:8.5px;color:#382010;">trade·fees·reward</span>
+    </div>
+  </div>
+
+</div><!-- end s78 section 7 -->
 <!-- ═══════════════════════════════════════════════════════════ -->
 <!--  SECTION — Définitions PPO / LSTM                          -->
 <!-- ═══════════════════════════════════════════════════════════ -->
